@@ -1,6 +1,18 @@
+import { GetStaticProps } from 'next';
+import { api } from '../services/api';
+
+type Episode = {
+  id: string;
+  title: string;
+  members: string;
+}
+
+type HomeProps = {
+  episodes: Episode[];
+}
 
 //SSG
-export default function Home(props) {
+export default function Home(props: HomeProps) {
   console.log(props.episodes) // é exibido no console do next
 
   return (
@@ -11,9 +23,14 @@ export default function Home(props) {
   )
 }
 
-export async function getStaticProps() {
-  const response = await fetch('http://localhost:3333/episodes')
-  const data = await response.json()
+export const getStaticProps: GetStaticProps = async () => {
+  const { data } = await api.get('episodes', {
+    params: {
+      _limit: 12,
+      _sort: 'published_at',
+      _order: 'desc'
+    }
+  });
 
   return {
     props: {
