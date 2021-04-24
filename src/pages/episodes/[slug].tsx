@@ -27,8 +27,12 @@ type EpisodeProps = {
 }
 
 export default function Episode({ episode }: EpisodeProps) {
-    const router = useRouter();
+    // è usado somente quando o fallback = true() do getStaticPaths
+    // const router = useRouter();
 
+    // if (router.isFallback) {
+    //     return <p>Carregando...</p>
+    // }
     return (
         <div className={styles.episode}>
             <div className={styles.thumbnailContainer}>
@@ -64,9 +68,28 @@ export default function Episode({ episode }: EpisodeProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
+    const { data } = await api.get('episodes', {
+        params: {
+            _limit: 2,
+            _sort: 'published_at',
+            _order: 'desc'
+        }
+    })
+
+    const paths = data.map(episode => {
+        return {
+            params: {
+                slug: episode.id
+            }
+        }
+    })
+
     return {
-        paths: [],
+        paths,
         fallback: 'blocking'
+        //blocking = gera as paginas estaticas no server node
+        //true = faz a requisição para gerar a página estaticas pelo front(navegador)
+        //false = retorna 404 se não foi gerada na build informada no paths
     }
 }
 
